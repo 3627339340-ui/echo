@@ -6,14 +6,14 @@
   <title>未来回音 💌</title>
   <style>
     body{
-      font-family: 'PingFang SC','Segoe UI',sans-serif;
+      font-family:'PingFang SC','Segoe UI',sans-serif;
       background: linear-gradient(135deg,#f9f9f9,#eaf1ff);
       color:#333;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      height:100vh;
+      min-height:100vh;
       margin:0;
       padding:1rem;
       box-sizing:border-box;
@@ -24,11 +24,6 @@
       box-shadow:0 6px 12px rgba(90,124,255,0.12);transition:transform .6s;cursor:pointer;margin-bottom:1rem;
     }
     .envelope.open{ transform: rotateX(180deg); }
-    .envelope::before{
-      content:'';position:absolute;top:calc(50% - 80px);left:50%;transform:translateX(-50%);
-      width:0;height:0;border-left:130px solid transparent;border-right:130px solid transparent;
-      border-bottom:80px solid #5a7cff;border-radius:6px;transition:transform .6s;opacity:0.08;
-    }
     textarea{
       width:90%;height:120px;font-size:1rem;padding:1rem;border-radius:10px;border:1px solid #ccc;
       outline:none;resize:none;margin-bottom:.8rem;
@@ -100,7 +95,6 @@
           if (data && data.reply) {
             outputEl.innerText = data.reply;
             outputEl.style.display = 'block';
-            // 自动展开信封以展示回信
             envelope.classList.add('open');
           } else {
             outputEl.innerText = '未来暂时没来得及回复。';
