@@ -1,7 +1,6 @@
 {
   "name": "future-echo",
   "version": "1.0.0",
-  "description": "未来回音 - 在 Zeabur 可部署的稳定版本",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
