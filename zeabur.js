@@ -1,9 +1,5 @@
 {
-  "build": {
-    "command": "npm install"
-  },
-  "start": {
-    "command": "npm start"
-  },
+  "build": { "command": "npm ci" },
+  "start": { "command": "npm start" },
   "output": "."
 }
