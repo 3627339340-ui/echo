@@ -1,195 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>未来回音 💌</title>
 <style>
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'PingFang SC', 'Segoe UI', sans-serif;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  margin: 0; padding: 0;
+  font-family:'PingFang SC','Segoe UI',sans-serif;
+  height:100vh; width:100vw;
+  overflow:hidden; display:flex; justify-content:center; align-items:center;
   background: linear-gradient(135deg,#f0f4ff,#fff9f2);
-  position: relative;
-  user-select: none;
+  position:relative; user-select:none;
 }
 
 /* 背景容器 */
 #bgContainer {
-  position: absolute; top:0; left:0;
-  width:100%; height:100%;
-  background-size: cover;
-  background-position: center;
-  z-index:-1;
-  transition: background 0.5s ease;
-}
-#changeBgHint {
-  position: absolute;
-  bottom: 20px; left:50%;
-  transform: translateX(-50%);
-  font-size: 0.9rem;
-  color: #666;
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  background-size:cover; background-position:center;
+  z-index:-1; transition: background 0.5s ease;
 }
 
-/* 信封 */
+/* 信封初始界面 */
 .envelope-container {
-  perspective: 1000px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  width: 50%; height: 50%;
+  perspective:1000px;
+  display:flex; justify-content:center; align-items:center;
+  width:50%; height:50%; max-width:600px; max-height:600px;
 }
 .envelope {
-  width: 100%; height: 100%;
-  max-width: 600px; max-height: 600px;
-  background: rgba(255,255,255,0.85);
-  border-radius: 24px;
-  border: 2px solid rgba(255,255,255,0.6);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+  width:100%; height:100%;
+  background:#fff;
+  border:2px solid #c7d2fe;
+  border-radius:16px;
+  box-shadow:0 12px 36px rgba(0,0,0,0.2);
   display:flex; justify-content:center; align-items:center;
-  font-size:4rem; color:#5a7cff;
-  cursor:pointer;
+  font-size:6rem; color:#5a7cff; cursor:pointer;
   animation: sway 2s ease-in-out infinite alternate;
-  transition: opacity 1s ease;
+  position:relative; transition:all 1s ease;
+}
+.envelope::before {
+  content:""; position:absolute; top:0; left:0;
+  width:100%; height:100%;
+  background: linear-gradient(to bottom right, #e0ebff, #fff);
+  clip-path: polygon(0 0, 100% 0, 50% 50%);
 }
 .envelope.open { animation-play-state:paused; opacity:0; }
+
 @keyframes sway {0%{transform:rotateY(-5deg);}100%{transform:rotateY(5deg);}}
 
-/* 输入面板 */
+/* 输入界面/信纸 */
 #inputPanel {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  width: 50%; max-width: 600px;
-  position: relative;
+  display:none; flex-direction:column; align-items:center;
+  width:50%; max-width:600px;
+  position:relative; transition: all 0.5s ease;
 }
 #inputPanel::before {
-  content:'';
-  position:absolute;
-  top:0; left:0; right:0; bottom:0;
+  content:"";
+  position:absolute; top:0; left:0; right:0; bottom:0;
   background: rgba(255,255,255,0.2);
-  border-radius: 24px;
-  backdrop-filter: blur(10px);
+  border-radius:24px;
+  backdrop-filter: blur(12px);
   z-index:-1;
+  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-repeat: repeat;
 }
 h1 {
-  font-size: 2rem;
+  font-size:2.5rem; margin-bottom:2rem;
   background: linear-gradient(90deg,#5a7cff,#a0c4ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 1rem;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 #userInput {
-  width:100%;
-  padding:1rem;
-  border-radius: 16px;
-  border:1px solid rgba(0,0,0,0.1);
-  font-size:1rem;
-  backdrop-filter: blur(8px);
-  background: rgba(255,255,255,0.6);
-  margin-bottom:0.6rem;
-  resize:none;
+  width:100%; padding:1rem;
+  border-radius:16px; border:1px solid rgba(0,0,0,0.1);
+  font-size:1.1rem; backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.6); resize:none; margin-bottom:1rem;
 }
-button {
-  border:none;
-  border-radius: 16px;
-  padding:0.8rem 1rem;
-  font-size:1rem;
-  cursor:pointer;
-  backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.6);
-  color:#333;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
+#sendBtn {
+  width:100%; padding:0.8rem;
+  border:none; border-radius:16px; cursor:pointer;
+  font-size:1.1rem;
+  background: linear-gradient(90deg,#5a7cff,#a0c4ff);
+  color:white; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  transition:0.3s;
 }
-button:hover { background: rgba(255,255,255,0.85); }
-#sendBtn { width:100%; margin-bottom:0.5rem; }
+#sendBtn:hover { opacity:0.85; }
 
 #loading { margin-top:0.5rem; color:#666; display:none; }
 
-/* 信纸面板 */
+/* 信纸回信界面 */
 #letterPanel {
-  display:none;
-  flex-direction: column;
-  align-items: center;
+  display:none; flex-direction:column; align-items:center;
   background: rgba(255,255,255,0.95);
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%), url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-  background-repeat: repeat;
-  backdrop-filter: blur(10px);
-  border-radius:24px;
-  box-shadow:0 12px 36px rgba(0,0,0,0.2);
-  padding:1rem;
-  width:50%; max-width:600px; max-height:50%;
-  overflow-y:auto;
-  transform: scaleY(0); transform-origin: top;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.85)),
+                    url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  background-repeat:repeat;
+  border-radius:24px; box-shadow:0 12px 36px rgba(0,0,0,0.2);
+  padding:1rem; width:50%; max-width:600px; max-height:50%;
+  overflow-y:auto; transform: scaleY(0); transform-origin:top;
   transition: transform 1s ease, opacity 0.8s ease;
 }
 #letterPanel.show { transform: scaleY(1); }
 
-#letterText {
-  width:100%;
-  white-space: pre-wrap;
-  font-size:1rem;
-  color:#333;
-  flex:1;
-  margin-bottom:0.6rem;
-}
+#letterText { width:100%; white-space:pre-wrap; font-size:1rem; color:#333; flex:1; margin-bottom:0.6rem; }
 
 .letterControls { display:flex; justify-content:space-between; width:100%; gap:1rem; }
-.letterControls button { flex:1; }
+.letterControls button { flex:1; border:none; border-radius:16px; padding:0.6rem;
+  backdrop-filter: blur(10px); background: rgba(255,255,255,0.6);
+  box-shadow:0 4px 12px rgba(0,0,0,0.1); cursor:pointer; transition:0.3s; }
+.letterControls button:hover { background: rgba(255,255,255,0.85); }
 
-/* 背景加号 */
 #bgPlus { display:none; font-size:3rem; color:#5a7cff; cursor:pointer; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
 
-/* 背景管理面板 */
 #bgManager {
-  display:none;
-  position:absolute; top:10%; left:50%;
-  transform: translateX(-50%);
-  width:60%; max-width:600px;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
-  box-shadow:0 12px 36px rgba(0,0,0,0.2);
-  padding: 1rem;
-  flex-direction: column;
-  z-index:1000;
+  display:none; position:absolute; top:10%; left:50%; transform:translateX(-50%);
+  width:60%; max-width:600px; background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px); border-radius: 20px;
+  box-shadow:0 12px 36px rgba(0,0,0,0.2); padding: 1rem; flex-direction: column; z-index:1000;
 }
 #bgHistory { display:flex; gap:0.5rem; overflow-x:auto; margin-top:0.5rem; }
-.bgHistoryItem {
-  width:50px; height:50px;
-  border-radius:12px;
-  border:1px solid #ccc;
-  cursor:pointer;
-  flex-shrink:0;
-  background-size:cover;
-  background-position:center;
-}
+.bgHistoryItem { width:50px; height:50px; border-radius:12px; border:1px solid #ccc; cursor:pointer; flex-shrink:0; background-size:cover; background-position:center; }
 #bgManager button { margin-top:0.5rem; }
+
+#voiceSelect { margin-bottom:0.5rem; width:100%; padding:0.6rem; border-radius:12px; border:1px solid #ccc; }
 
 </style>
 </head>
 <body>
 
 <div id="bgContainer"></div>
-<div id="changeBgHint">更改背景</div>
 
 <div class="envelope-container">
-  <div class="envelope" id="envelope"></div>
+  <div class="envelope" id="envelope">✉️</div>
 </div>
 
 <div id="inputPanel">
   <h1>未来回音</h1>
   <textarea id="userInput" placeholder="写下此刻的心声、疑惑或愿望..."></textarea>
+  <select id="voiceSelect">
+    <option value="male">男声</option>
+    <option value="female">女声</option>
+  </select>
   <button id="sendBtn">生成未来回信</button>
   <div id="loading">正在生成未来的回音...</div>
 </div>
@@ -202,54 +152,45 @@ button:hover { background: rgba(255,255,255,0.85); }
   </div>
 </div>
 
-<div id="bgPlus">+</div>
-
-<div id="bgManager">
-  <label>导入背景图片：</label>
-  <input type="file" id="bgFileInput" accept="image/*">
-  <div id="bgHistory"></div>
-  <button id="bgCloseBtn">退出更改背景</button>
-</div>
-
 <script>
 (function(){
 const envelope = document.getElementById('envelope');
 const inputPanel = document.getElementById('inputPanel');
 const sendBtn = document.getElementById('sendBtn');
 const userInput = document.getElementById('userInput');
+const voiceSelect = document.getElementById('voiceSelect');
 const loadingEl = document.getElementById('loading');
 const letterPanel = document.getElementById('letterPanel');
 const letterText = document.getElementById('letterText');
 const closeLetter = document.getElementById('closeLetter');
 const playVoice = document.getElementById('playVoice');
-const bgContainer = document.getElementById('bgContainer');
-const bgPlus = document.getElementById('bgPlus');
-const changeBgHint = document.getElementById('changeBgHint');
-const bgManager = document.getElementById('bgManager');
-const bgFileInput = document.getElementById('bgFileInput');
-const bgCloseBtn = document.getElementById('bgCloseBtn');
-const bgHistoryEl = document.getElementById('bgHistory');
 
-let bgHistory = [];
 let isPlaying = false;
-let utter;
+let audioObj = null;
 
-// 初始信封动画
+// 信封点击动画
 envelope.addEventListener('click', ()=>{
   envelope.classList.add('open');
-  setTimeout(()=>{ envelope.parentElement.style.display='none'; inputPanel.style.display='flex'; },1000);
+  setTimeout(()=>{
+    envelope.parentElement.style.display='none';
+    inputPanel.style.display='flex';
+  },1000);
 });
 
-// 生成回信
+// 生成未来回信
 sendBtn.addEventListener('click', async ()=>{
   const input = userInput.value.trim();
-  if(!input) return alert('请输入内容');
+  if(!input){ alert('请输入内容'); return; }
   loadingEl.style.display='block';
   letterText.innerText='';
   try{
-    const res = await fetch('/api/generate',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({input}) });
+    const res = await fetch('/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({input})
+    });
     const data = await res.json();
-    letterText.innerText = data.reply||'未来暂时没来得及回复。';
+    letterText.innerText = data.reply || '未来暂时没来得及回复。';
     loadingEl.style.display='none';
     inputPanel.style.display='none';
     letterPanel.style.display='flex';
@@ -263,95 +204,41 @@ sendBtn.addEventListener('click', async ()=>{
   }
 });
 
-// 收起信纸
-closeLetter.addEventListener('click', hideLetter);
-
-function hideLetter(){
+// 收起信纸回到输入界面
+closeLetter.addEventListener('click', ()=>{
   letterPanel.classList.remove('show');
   stopVoice();
-  setTimeout(()=>{
+  setTimeout(()=>{ 
     letterPanel.style.display='none';
-    bgPlus.style.display='block';
-    changeBgHint.style.opacity=1;
+    inputPanel.style.display='flex';
   },800);
-}
+});
 
-// 语音播放
-playVoice.addEventListener('click', ()=>{
-  if(!isPlaying){
-    const text = letterText.innerText.trim();
-    if(!text) return;
-    utter = new SpeechSynthesisUtterance(text);
-    utter.lang='zh-CN';
-    utter.onend=()=>{ resetVoiceBtn(); };
-    speechSynthesis.speak(utter);
+// 自行生成语音（不依赖浏览器 TTS）
+playVoice.addEventListener('click', async ()=>{
+  if(isPlaying){
+    stopVoice();
+    return;
+  }
+  const text = letterText.innerText.trim();
+  if(!text) return;
+  const gender = voiceSelect.value;
+  // 假设后端 /api/voice 接口返回生成好的 mp3 文件 URL
+  try{
     isPlaying=true;
     playVoice.innerText='停止播放';
-  }else stopVoice();
+    if(audioObj){ audioObj.pause(); audioObj=null; }
+    audioObj=new Audio(`/api/voice?text=${encodeURIComponent(text)}&gender=${gender}`);
+    audioObj.onended = ()=>{ stopVoice(); };
+    audioObj.play();
+  }catch(e){ stopVoice(); console.error(e);}
 });
 
 function stopVoice(){
-  if(isPlaying) speechSynthesis.cancel();
+  if(audioObj){ audioObj.pause(); audioObj=null; }
   isPlaying=false;
-  resetVoiceBtn();
+  playVoice.innerText='语音播放';
 }
-
-function resetVoiceBtn(){ playVoice.innerText='语音播放'; }
-
-// 背景更改面板显示方式
-function showBgManager(e){
-  e.preventDefault();
-  bgManager.style.display='flex';
-}
-function hideBgManager(){ bgManager.style.display='none'; }
-
-bgCloseBtn.addEventListener('click', hideBgManager);
-
-// PC右键 / 移动长按触发
-bgContainer.addEventListener('contextmenu', showBgManager);
-let longPressTimer = null;
-bgContainer.addEventListener('touchstart', ()=>{
-  longPressTimer = setTimeout(showBgManager,600);
-});
-bgContainer.addEventListener('touchend', ()=>{ clearTimeout(longPressTimer); });
-
-// 导入背景图片
-bgFileInput.addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload=function(evt){
-    const url = evt.target.result;
-    bgContainer.style.background=`url(${url}) center/cover no-repeat`;
-    bgHistory.push(url);
-    updateBgHistory();
-  };
-  reader.readAsDataURL(file);
-});
-
-// 背景历史
-function updateBgHistory(){
-  bgHistoryEl.innerHTML='';
-  bgHistory.slice().reverse().forEach((bg,index)=>{
-    const div = document.createElement('div');
-    div.className='bgHistoryItem';
-    div.style.backgroundImage=`url(${bg})`;
-    div.onclick=()=>{ bgContainer.style.background=`url(${bg}) center/cover no-repeat`; };
-    bgHistoryEl.appendChild(div);
-  });
-}
-
-// 点击背景加号
-bgPlus.addEventListener('click', ()=>{ bgManager.style.display='flex'; });
-
-// 鼠标提示
-bgPlus.addEventListener('mouseenter', ()=>{ changeBgHint.style.opacity=1; });
-bgPlus.addEventListener('mouseleave', ()=>{ changeBgHint.style.opacity=0; });
-
-// 点击背景收起信纸
-bgContainer.addEventListener('click', ()=>{
-  if(letterPanel.style.display==='flex') hideLetter();
-});
 
 })();
 </script>
