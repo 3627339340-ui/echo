@@ -1,148 +1,118 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>未来回音 💌</title>
   <style>
-    body {
-      font-family: 'PingFang SC', 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f9f9f9, #eaf1ff);
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      overflow-x: hidden;
+    body{
+      font-family: 'PingFang SC','Segoe UI',sans-serif;
+      background: linear-gradient(135deg,#f9f9f9,#eaf1ff);
+      color:#333;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      height:100vh;
+      margin:0;
+      padding:1rem;
+      box-sizing:border-box;
     }
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
-      color: #5a7cff;
+    h1{font-size:1.8rem;color:#5a7cff;margin-bottom:1rem}
+    .envelope{
+      width:260px;height:160px;background:#fff;border:2px solid #c7d2fe;border-radius:8px;
+      box-shadow:0 6px 12px rgba(90,124,255,0.12);transition:transform .6s;cursor:pointer;margin-bottom:1rem;
     }
-    .envelope {
-      position: relative;
-      width: 260px;
-      height: 160px;
-      background: #fff;
-      border: 2px solid #c7d2fe;
-      border-radius: 8px;
-      box-shadow: 0 6px 12px rgba(90, 124, 255, 0.2);
-      transition: transform 0.6s ease;
-      cursor: pointer;
-      margin-bottom: 1rem;
+    .envelope.open{ transform: rotateX(180deg); }
+    .envelope::before{
+      content:'';position:absolute;top:calc(50% - 80px);left:50%;transform:translateX(-50%);
+      width:0;height:0;border-left:130px solid transparent;border-right:130px solid transparent;
+      border-bottom:80px solid #5a7cff;border-radius:6px;transition:transform .6s;opacity:0.08;
     }
-    .envelope.open {
-      transform: rotateX(180deg);
+    textarea{
+      width:90%;height:120px;font-size:1rem;padding:1rem;border-radius:10px;border:1px solid #ccc;
+      outline:none;resize:none;margin-bottom:.8rem;
     }
-    .envelope::before {
-      content: '';
-      position: absolute;
-      top: -80px;
-      left: 0;
-      width: 100%;
-      height: 80px;
-      background: #5a7cff;
-      clip-path: polygon(0 100%, 50% 0, 100% 100%);
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-      transition: transform 0.6s ease;
-      transform-origin: bottom;
+    button{
+      padding:.6rem 1.2rem;border:none;border-radius:8px;background:#5a7cff;color:#fff;cursor:pointer;font-size:1rem;
     }
-    .envelope.open::before {
-      transform: rotateX(180deg);
-      background: #4668e8;
+    button:hover{background:#4668e8}
+    #loading{margin-top:.8rem;color:#666;display:none}
+    #output{
+      margin-top:1rem;white-space:pre-wrap;width:90%;padding:1rem;background:#fff;border-radius:10px;border:1px solid #eee;
+      box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px;display:none;
     }
-    textarea {
-      width: 90%;
-      height: 120px;
-      font-size: 1rem;
-      padding: 1rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-bottom: 1rem;
-      outline: none;
-      resize: none;
-    }
-    button {
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      background: #5a7cff;
-      color: white;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-    button:hover {
-      background: #4668e8;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(70,104,232,0.3);
-    }
-    #output {
-      margin-top: 1.5rem;
-      white-space: pre-wrap;
-      width: 90%;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      border: 1px solid #eee;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      min-height: 60px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.6s ease;
-    }
-    #output.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .controls{margin-top:.6rem;display:flex;gap:.5rem}
+    .controls button{background:#6fc3a6}
   </style>
 </head>
 <body>
   <h1>未来回音 💌</h1>
-  <div class="envelope" id="envelope"></div>
-  <textarea id="userInput" placeholder="写下此刻的心声、疑惑或愿望..."></textarea>
-  <button onclick="generateLetter()">✨ 生成未来回信</button>
+  <div class="envelope" id="envelope" title="点击展开信封"></div>
 
-  <div id="loading" style="display:none; margin-top:1rem;">🤖 正在生成未来的回音...</div>
+  <textarea id="userInput" placeholder="写下此刻的心声、疑惑或愿望..."></textarea>
+  <div>
+    <button id="sendBtn">✨ 生成未来回信</button>
+  </div>
+
+  <div id="loading">🤖 正在生成未来的回音...</div>
   <div id="output"></div>
 
   <script>
-    const envelope = document.getElementById("envelope");
-    envelope.addEventListener("click", () => {
-      envelope.classList.toggle("open");
-    });
+    (function(){
+      const envelope = document.getElementById('envelope');
+      const sendBtn = document.getElementById('sendBtn');
+      const inputEl = document.getElementById('userInput');
+      const loadingEl = document.getElementById('loading');
+      const outputEl = document.getElementById('output');
 
-    async function generateLetter() {
-      const input = document.getElementById("userInput").value.trim();
-      if (!input) return alert("请输入内容");
+      loadingEl.style.display = 'none';
 
-      document.getElementById("loading").style.display = "block";
-      document.getElementById("output").classList.remove("show");
-      document.getElementById("output").innerText = "";
+      envelope.addEventListener('click', () => {
+        envelope.classList.toggle('open');
+      });
 
-      try {
-        const res = await fetch("/functions/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ input }),
-        });
-        const data = await res.json();
+      sendBtn.addEventListener('click', async () => {
+        const input = inputEl.value.trim();
+        if(!input) { alert('请输入内容'); return; }
 
-        document.getElementById("loading").style.display = "none";
-        if (data.reply) {
-          document.getElementById("output").innerText = data.reply;
-          document.getElementById("output").classList.add("show");
-          envelope.classList.add("open");
-        } else {
-          document.getElementById("output").innerText = "未来似乎有点忙，请稍后再试。";
+        loadingEl.style.display = 'block';
+        outputEl.style.display = 'none';
+        outputEl.innerText = '';
+
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ input })
+          });
+
+          loadingEl.style.display = 'none';
+
+          if (!res.ok) {
+            const errText = await res.text().catch(()=>null);
+            outputEl.innerText = '请求失败: ' + (errText || res.statusText || res.status);
+            outputEl.style.display = 'block';
+            return;
+          }
+
+          const data = await res.json().catch(()=>null);
+          if (data && data.reply) {
+            outputEl.innerText = data.reply;
+            outputEl.style.display = 'block';
+            // 自动展开信封以展示回信
+            envelope.classList.add('open');
+          } else {
+            outputEl.innerText = '未来暂时没来得及回复。';
+            outputEl.style.display = 'block';
+          }
+        } catch (err) {
+          loadingEl.style.display = 'none';
+          outputEl.innerText = '网络或服务器错误: ' + (err && err.message ? err.message : String(err));
+          outputEl.style.display = 'block';
         }
-      } catch (err) {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("output").innerText = "请求出错：" + err.message;
-      }
-    }
+      });
+    })();
   </script>
 </body>
 </html>
