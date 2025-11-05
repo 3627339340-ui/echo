@@ -5,40 +5,151 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>未来回音 💌</title>
   <style>
-    body{
-      font-family:'PingFang SC','Segoe UI',sans-serif;
-      background: linear-gradient(135deg,#f9f9f9,#eaf1ff);
-      color:#333;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-      margin:0;
-      padding:1rem;
-      box-sizing:border-box;
+    :root {
+      --primary: #7b9acc;
+      --accent: #f3c5b8;
+      --bg-gradient: linear-gradient(160deg, #fdf7f3, #f7f4ff, #ecf7ff);
     }
-    h1{font-size:1.8rem;color:#5a7cff;margin-bottom:1rem}
-    .envelope{
-      width:260px;height:160px;background:#fff;border:2px solid #c7d2fe;border-radius:8px;
-      box-shadow:0 6px 12px rgba(90,124,255,0.12);transition:transform .6s;cursor:pointer;margin-bottom:1rem;
+
+    body {
+      font-family: 'PingFang SC','Segoe UI',sans-serif;
+      background: var(--bg-gradient);
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.6s ease-in-out;
+      color: #333;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2rem 1rem 5rem;
     }
-    .envelope.open{ transform: rotateX(180deg); }
-    textarea{
-      width:90%;height:120px;font-size:1rem;padding:1rem;border-radius:10px;border:1px solid #ccc;
-      outline:none;resize:none;margin-bottom:.8rem;
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-bottom: 1.2rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
-    button{
-      padding:.6rem 1.2rem;border:none;border-radius:8px;background:#5a7cff;color:#fff;cursor:pointer;font-size:1rem;
+
+    .envelope {
+      width: 260px;
+      height: 160px;
+      background: #fff;
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.6s ease-in-out;
+      box-shadow: 0 6px 12px rgba(123,154,204,0.25);
+      cursor: pointer;
+      margin-bottom: 1.5rem;
     }
-    button:hover{background:#4668e8}
-    #loading{margin-top:.8rem;color:#666;display:none}
-    #output{
-      margin-top:1rem;white-space:pre-wrap;width:90%;padding:1rem;background:#fff;border-radius:10px;border:1px solid #eee;
-      box-shadow:0 2px 4px rgba(0,0,0,0.05);min-height:60px;display:none;
+
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: var(--accent);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
     }
-    .controls{margin-top:.6rem;display:flex;gap:.5rem}
-    .controls button{background:#6fc3a6}
+
+    .envelope.open {
+      transform: rotateX(180deg);
+    }
+
+    textarea {
+      width: 90%;
+      height: 120px;
+      font-size: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      outline: none;
+      resize: none;
+      margin-bottom: .8rem;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .buttons {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: .6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #6c8cc0;
+    }
+
+    #loading {
+      margin-top: .8rem;
+      color: #666;
+      display: none;
+    }
+
+    #output {
+      margin-top: 1rem;
+      white-space: pre-wrap;
+      width: 90%;
+      padding: 1rem;
+      background: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      border: 1px solid #eee;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      min-height: 60px;
+      display: none;
+      position: relative;
+    }
+
+    .output-controls {
+      display: flex;
+      gap: .5rem;
+      margin-top: .6rem;
+      justify-content: center;
+    }
+
+    .upload-container {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+      color: #555;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .upload-btn {
+      background: #a8d8b9;
+    }
+
+    .upload-btn:hover {
+      background: #93c7a7;
+    }
+
+    audio {
+      width: 80%;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -46,67 +157,107 @@
   <div class="envelope" id="envelope" title="点击展开信封"></div>
 
   <textarea id="userInput" placeholder="写下此刻的心声、疑惑或愿望..."></textarea>
-  <div>
+
+  <div class="buttons">
     <button id="sendBtn">✨ 生成未来回信</button>
+    <button id="collapseBtn" style="background:#f3c5b8;">📩 收起回信</button>
   </div>
 
   <div id="loading">🤖 正在生成未来的回音...</div>
   <div id="output"></div>
 
+  <div class="output-controls" id="outputControls" style="display:none;">
+    <button id="playVoiceBtn">🔊 播放语音</button>
+  </div>
+
+  <div class="upload-container">
+    <label for="bgUpload" class="upload-btn button">🖼️ 更换背景</label>
+    <input type="file" id="bgUpload" accept="image/*">
+  </div>
+
   <script>
-    (function(){
-      const envelope = document.getElementById('envelope');
-      const sendBtn = document.getElementById('sendBtn');
-      const inputEl = document.getElementById('userInput');
-      const loadingEl = document.getElementById('loading');
-      const outputEl = document.getElementById('output');
+    const envelope = document.getElementById('envelope');
+    const sendBtn = document.getElementById('sendBtn');
+    const collapseBtn = document.getElementById('collapseBtn');
+    const inputEl = document.getElementById('userInput');
+    const loadingEl = document.getElementById('loading');
+    const outputEl = document.getElementById('output');
+    const outputControls = document.getElementById('outputControls');
+    const playVoiceBtn = document.getElementById('playVoiceBtn');
+    const bgUpload = document.getElementById('bgUpload');
 
-      loadingEl.style.display = 'none';
+    let lastReply = '';
 
-      envelope.addEventListener('click', () => {
-        envelope.classList.toggle('open');
-      });
+    envelope.addEventListener('click', () => {
+      envelope.classList.toggle('open');
+    });
 
-      sendBtn.addEventListener('click', async () => {
-        const input = inputEl.value.trim();
-        if(!input) { alert('请输入内容'); return; }
+    sendBtn.addEventListener('click', async () => {
+      const input = inputEl.value.trim();
+      if(!input) { alert('请输入内容'); return; }
 
-        loadingEl.style.display = 'block';
-        outputEl.style.display = 'none';
-        outputEl.innerText = '';
+      loadingEl.style.display = 'block';
+      outputEl.style.display = 'none';
+      outputControls.style.display = 'none';
+      outputEl.innerText = '';
 
-        try {
-          const res = await fetch('/api/generate', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ input })
-          });
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ input })
+        });
 
-          loadingEl.style.display = 'none';
+        loadingEl.style.display = 'none';
+        const data = await res.json().catch(()=>null);
 
-          if (!res.ok) {
-            const errText = await res.text().catch(()=>null);
-            outputEl.innerText = '请求失败: ' + (errText || res.statusText || res.status);
-            outputEl.style.display = 'block';
-            return;
-          }
-
-          const data = await res.json().catch(()=>null);
-          if (data && data.reply) {
-            outputEl.innerText = data.reply;
-            outputEl.style.display = 'block';
-            envelope.classList.add('open');
-          } else {
-            outputEl.innerText = '未来暂时没来得及回复。';
-            outputEl.style.display = 'block';
-          }
-        } catch (err) {
-          loadingEl.style.display = 'none';
-          outputEl.innerText = '网络或服务器错误: ' + (err && err.message ? err.message : String(err));
+        if (data && data.reply) {
+          lastReply = data.reply;
+          outputEl.innerText = data.reply;
+          outputEl.style.display = 'block';
+          outputControls.style.display = 'flex';
+          envelope.classList.add('open');
+        } else {
+          outputEl.innerText = '未来暂时没来得及回复。';
           outputEl.style.display = 'block';
         }
-      });
-    })();
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        outputEl.innerText = '网络或服务器错误: ' + err.message;
+        outputEl.style.display = 'block';
+      }
+    });
+
+    collapseBtn.addEventListener('click', () => {
+      outputEl.style.display = 'none';
+      outputControls.style.display = 'none';
+      envelope.classList.remove('open');
+    });
+
+    playVoiceBtn.addEventListener('click', () => {
+      if (!lastReply) {
+        alert('请先生成回信');
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(lastReply);
+      utterance.lang = 'zh-CN';
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      speechSynthesis.speak(utterance);
+    });
+
+    bgUpload.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.body.style.backgroundImage = `url(${ev.target.result})`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+      };
+      reader.readAsDataURL(file);
+    });
   </script>
 </body>
 </html>
