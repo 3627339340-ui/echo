@@ -1,263 +1,261 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>未来回音 💌</title>
-  <style>
-    :root {
-      --primary: #7b9acc;
-      --accent: #f3c5b8;
-      --bg-gradient: linear-gradient(160deg, #fdf7f3, #f7f4ff, #ecf7ff);
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>未来回音 💌</title>
+<style>
+  /* 全局样式 */
+  body {
+    font-family:'PingFang SC','Segoe UI',sans-serif;
+    background: linear-gradient(135deg,#f0f4ff,#fff9f2);
+    margin:0;
+    padding:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    position:relative;
+  }
 
-    body {
-      font-family: 'PingFang SC','Segoe UI',sans-serif;
-      background: var(--bg-gradient);
-      background-size: cover;
-      background-position: center;
-      transition: background-image 0.6s ease-in-out;
-      color: #333;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 2rem 1rem 5rem;
-    }
+  /* 背景可更换容器 */
+  #bgContainer {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background-size:cover;
+    background-position:center;
+    z-index:-1;
+    transition: background 0.5s ease;
+    cursor:pointer;
+  }
 
-    h1 {
-      font-size: 1.8rem;
-      color: var(--primary);
-      margin-bottom: 1.2rem;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
+  #changeBgHint {
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:0.9rem;
+    color:#666;
+    opacity:0;
+    transition:opacity 0.3s;
+    pointer-events:none;
+  }
 
-    .envelope {
-      width: 260px;
-      height: 160px;
-      background: #fff;
-      border: 2px solid var(--primary);
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.6s ease-in-out;
-      box-shadow: 0 6px 12px rgba(123,154,204,0.25);
-      cursor: pointer;
-      margin-bottom: 1.5rem;
-    }
+  /* 信封样式 */
+  .envelope-container {
+    perspective:1000px;
+  }
 
-    .envelope::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 50%;
-      background: var(--accent);
-      clip-path: polygon(0 0, 100% 0, 50% 100%);
-    }
+  .envelope {
+    width:280px; height:180px;
+    background: rgba(255,255,255,0.85);
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.5);
+    box-shadow:0 8px 24px rgba(0,0,0,0.15);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:2rem;
+    color:#5a7cff;
+    cursor:pointer;
+    transform-style: preserve-3d;
+    animation: sway 2s ease-in-out infinite alternate;
+  }
 
-    .envelope.open {
-      transform: rotateX(180deg);
-    }
+  .envelope.open { animation-play-state:paused; }
 
-    textarea {
-      width: 90%;
-      height: 120px;
-      font-size: 1rem;
-      padding: 1rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      outline: none;
-      resize: none;
-      margin-bottom: .8rem;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
+  @keyframes sway {
+    0% { transform: rotateY(-5deg); }
+    100% { transform: rotateY(5deg); }
+  }
 
-    .buttons {
-      display: flex;
-      gap: .5rem;
-      margin-bottom: 1rem;
-    }
+  /* 未来回音面板 */
+  #letterPanel {
+    width:320px;
+    min-height:220px;
+    padding:1rem;
+    margin-top:1rem;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+    border-radius:16px;
+    box-shadow:0 12px 36px rgba(0,0,0,0.15);
+    display:none;
+    flex-direction:column;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+  }
 
-    button {
-      padding: .6rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      background: var(--primary);
-      color: #fff;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s;
-    }
+  #letterText {
+    flex:1;
+    padding:0.5rem;
+    font-size:1rem;
+    color:#333;
+    white-space:pre-wrap;
+    overflow-y:auto;
+    margin-bottom:0.8rem;
+  }
 
-    button:hover {
-      background: #6c8cc0;
-    }
+  .controls {
+    display:flex;
+    gap:0.5rem;
+    justify-content:flex-end;
+  }
 
-    #loading {
-      margin-top: .8rem;
-      color: #666;
-      display: none;
-    }
+  .controls button {
+    padding:0.5rem 1rem;
+    border:none;
+    border-radius:12px;
+    font-size:0.9rem;
+    cursor:pointer;
+    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.6);
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
 
-    #output {
-      margin-top: 1rem;
-      white-space: pre-wrap;
-      width: 90%;
-      padding: 1rem;
-      background: rgba(255,255,255,0.9);
-      border-radius: 10px;
-      border: 1px solid #eee;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      min-height: 60px;
-      display: none;
-      position: relative;
-    }
+  .controls button:hover { background: rgba(255,255,255,0.85); }
 
-    .output-controls {
-      display: flex;
-      gap: .5rem;
-      margin-top: .6rem;
-      justify-content: center;
-    }
+  /* 输入框和生成按钮 */
+  #userInput {
+    width:100%;
+    padding:0.8rem;
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,0.15);
+    margin-bottom:0.6rem;
+    resize:none;
+    font-size:1rem;
+    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.6);
+  }
 
-    .upload-container {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .5rem;
-      color: #555;
-    }
+  #sendBtn {
+    width:100%;
+    padding:0.8rem;
+    border:none;
+    border-radius:12px;
+    background:#5a7cff;
+    color:#fff;
+    font-size:1rem;
+    cursor:pointer;
+    transition:0.3s;
+  }
 
-    input[type="file"] {
-      display: none;
-    }
+  #sendBtn:hover { background:#4668e8; }
 
-    .upload-btn {
-      background: #a8d8b9;
-    }
+  #loading {
+    margin-top:0.5rem;
+    color:#666;
+    display:none;
+  }
 
-    .upload-btn:hover {
-      background: #93c7a7;
-    }
-
-    audio {
-      width: 80%;
-      margin-top: 0.5rem;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <h1>未来回音 💌</h1>
-  <div class="envelope" id="envelope" title="点击展开信封"></div>
+<div id="bgContainer"></div>
+<div id="changeBgHint">点击背景更换背景</div>
 
-  <textarea id="userInput" placeholder="写下此刻的心声、疑惑或愿望..."></textarea>
-
-  <div class="buttons">
+<div class="envelope-container">
+  <div class="envelope" id="envelope">💌</div>
+  <div id="letterPanel">
+    <textarea id="userInput" placeholder="写下此刻的心声、疑惑或愿望..."></textarea>
     <button id="sendBtn">✨ 生成未来回信</button>
-    <button id="collapseBtn" style="background:#f3c5b8;">📩 收起回信</button>
+    <div id="loading">🤖 正在生成未来的回音...</div>
+    <div id="letterText"></div>
+    <div class="controls">
+      <button id="closeLetter">收起回信</button>
+      <button id="playVoice">🔊 语音播放</button>
+    </div>
   </div>
+</div>
 
-  <div id="loading">🤖 正在生成未来的回音...</div>
-  <div id="output"></div>
+<script>
+(function(){
+  const envelope = document.getElementById('envelope');
+  const letterPanel = document.getElementById('letterPanel');
+  const sendBtn = document.getElementById('sendBtn');
+  const userInput = document.getElementById('userInput');
+  const loadingEl = document.getElementById('loading');
+  const letterText = document.getElementById('letterText');
+  const closeLetter = document.getElementById('closeLetter');
+  const playVoice = document.getElementById('playVoice');
+  const bgContainer = document.getElementById('bgContainer');
+  const changeBgHint = document.getElementById('changeBgHint');
 
-  <div class="output-controls" id="outputControls" style="display:none;">
-    <button id="playVoiceBtn">🔊 播放语音</button>
-  </div>
+  let currentBgIndex = 0;
+  const backgrounds = [
+    'linear-gradient(135deg,#f0f4ff,#fff9f2)',
+    'linear-gradient(135deg,#ffe6f0,#fff)',
+    'linear-gradient(135deg,#e0fff9,#f0f8ff)',
+  ];
 
-  <div class="upload-container">
-    <label for="bgUpload" class="upload-btn button">🖼️ 更换背景</label>
-    <input type="file" id="bgUpload" accept="image/*">
-  </div>
+  bgContainer.style.background = backgrounds[currentBgIndex];
 
-  <script>
-    const envelope = document.getElementById('envelope');
-    const sendBtn = document.getElementById('sendBtn');
-    const collapseBtn = document.getElementById('collapseBtn');
-    const inputEl = document.getElementById('userInput');
-    const loadingEl = document.getElementById('loading');
-    const outputEl = document.getElementById('output');
-    const outputControls = document.getElementById('outputControls');
-    const playVoiceBtn = document.getElementById('playVoiceBtn');
-    const bgUpload = document.getElementById('bgUpload');
+  // 信封点击
+  envelope.addEventListener('click', ()=>{
+    envelope.classList.add('open');
+    letterPanel.style.display = 'flex';
+  });
 
-    let lastReply = '';
+  // 收起回信
+  closeLetter.addEventListener('click', ()=>{
+    letterPanel.style.display = 'none';
+    envelope.classList.remove('open');
+  });
 
-    envelope.addEventListener('click', () => {
-      envelope.classList.toggle('open');
-    });
+  // 背景更换
+  bgContainer.addEventListener('mouseenter', ()=>{ changeBgHint.style.opacity = 1; });
+  bgContainer.addEventListener('mouseleave', ()=>{ changeBgHint.style.opacity = 0; });
+  bgContainer.addEventListener('click', ()=>{
+    currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
+    bgContainer.style.background = backgrounds[currentBgIndex];
+  });
 
-    sendBtn.addEventListener('click', async () => {
-      const input = inputEl.value.trim();
-      if(!input) { alert('请输入内容'); return; }
+  // 生成未来回信
+  sendBtn.addEventListener('click', async ()=>{
+    const input = userInput.value.trim();
+    if(!input){ alert('请输入内容'); return; }
 
-      loadingEl.style.display = 'block';
-      outputEl.style.display = 'none';
-      outputControls.style.display = 'none';
-      outputEl.innerText = '';
+    loadingEl.style.display = 'block';
+    letterText.innerText = '';
 
-      try {
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ input })
-        });
+    try{
+      const res = await fetch('/api/generate',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({input})
+      });
 
-        loadingEl.style.display = 'none';
-        const data = await res.json().catch(()=>null);
+      loadingEl.style.display = 'none';
 
-        if (data && data.reply) {
-          lastReply = data.reply;
-          outputEl.innerText = data.reply;
-          outputEl.style.display = 'block';
-          outputControls.style.display = 'flex';
-          envelope.classList.add('open');
-        } else {
-          outputEl.innerText = '未来暂时没来得及回复。';
-          outputEl.style.display = 'block';
-        }
-      } catch (err) {
-        loadingEl.style.display = 'none';
-        outputEl.innerText = '网络或服务器错误: ' + err.message;
-        outputEl.style.display = 'block';
-      }
-    });
-
-    collapseBtn.addEventListener('click', () => {
-      outputEl.style.display = 'none';
-      outputControls.style.display = 'none';
-      envelope.classList.remove('open');
-    });
-
-    playVoiceBtn.addEventListener('click', () => {
-      if (!lastReply) {
-        alert('请先生成回信');
+      if(!res.ok){
+        letterText.innerText = '请求失败: ' + res.statusText;
         return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(lastReply);
-      utterance.lang = 'zh-CN';
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      speechSynthesis.speak(utterance);
-    });
+      const data = await res.json();
+      if(data && data.reply){
+        letterText.innerText = data.reply;
+      }else{
+        letterText.innerText = '未来暂时没来得及回复。';
+      }
 
-    bgUpload.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        document.body.style.backgroundImage = `url(${ev.target.result})`;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center';
-      };
-      reader.readAsDataURL(file);
-    });
-  </script>
+    }catch(err){
+      loadingEl.style.display = 'none';
+      letterText.innerText = '网络或服务器错误: ' + err.message;
+    }
+  });
+
+  // 语音播放
+  playVoice.addEventListener('click', ()=>{
+    const text = letterText.innerText.trim();
+    if(!text) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'zh-CN';
+    speechSynthesis.speak(utter);
+  });
+
+})();
+</script>
 </body>
 </html>
