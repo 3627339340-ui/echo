@@ -34,7 +34,74 @@
     const body = document.body;
 
     const gradients = [
-      ["#ffb0d9", "#d6b0ff"],
+      ["#ff9edb", "#cdb0ff"],
+      ["#ffc4a4", "#ff8db0"],
+      ["#a4bfff", "#c6a4ff"],
+      ["#ffa8b0", "#ffb0f0"]
+    ];
+
+    // 3秒后自动进入输入界面
+    setTimeout(() => showInput(), 3000);
+    envelope.addEventListener("click", showInput);
+
+    function showInput() {
+      envelope.style.opacity = "0";
+      setTimeout(() => {
+        envelope.style.display = "none";
+        inputArea.style.display = "flex";
+      }, 1000);
+    }
+
+    // 点击生成未来回信
+    generateBtn.addEventListener("click", async () => {
+      const text = document.getElementById("message").value.trim();
+      const gender = document.querySelector('input[name="voice"]:checked').value;
+
+      if (!text) return alert("请先写下你的心声 ✨");
+
+      inputArea.style.display = "none";
+      letter.style.display = "flex";
+      letter.innerHTML = `<p>未来的你说：</p ><p>${text}</p >`;
+      controls.style.display = "flex";
+
+      // 浏览器语音
+      let utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "zh-CN";
+      utter.pitch = gender === "male" ? 0.9 : 1.1;
+      utter.rate = 1;
+
+      let voices = [];
+      function loadVoices() {
+        voices = speechSynthesis.getVoices();
+        utter.voice = voices.find(v =>
+          gender === "male" ? v.name.includes("男") : v.name.includes("女")
+        ) || voices[0];
+      }
+      loadVoices();
+      speechSynthesis.onvoiceschanged = loadVoices;
+
+      let playing = false;
+      voiceBtn.onclick = () => {
+        if (!playing) {
+          speechSynthesis.speak(utter);
+          playing = true;
+          voiceBtn.textContent = "⏹ 停止播放";
+        } else {
+          speechSynthesis.cancel();
+          playing = false;
+          voiceBtn.textContent = "🔊 播放语音";
+        }
+      };
+    });
+
+    // 点击背景切换渐变色
+    body.addEventListener("click", () => {
+      const g = gradients[Math.floor(Math.random() * gradients.length)];
+      body.style.background = `radial-gradient(circle at center, ${g[0]}, ${g[1]}, #000)`;
+    });
+  </script>
+</body>
+</html>      ["#ffb0d9", "#d6b0ff"],
       ["#ffc7a4", "#ff8db0"],
       ["#a4c8ff", "#c6a4ff"],
       ["#ffa8b0", "#ffb0f0"]
