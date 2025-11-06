@@ -1,40 +1,95 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>未来回音 💌</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{
-  width:100%;height:100%;
-  font-family:"PingFang SC","Segoe UI",sans-serif;
-  overflow:hidden;
-}
-body{
-  display:flex;align-items:center;justify-content:center;
-  background: radial-gradient(circle at center, #ffb6c1 0%, #4b004b 100%);
-  transition:background 1s ease;
-}
-#bgContainer{
-  position:absolute;top:0;left:0;right:0;bottom:0;
-  z-index:-1;
-  background:inherit;
-}
-#envelope{
-  font-size:120px;
-  animation:shake 1.5s infinite ease-in-out;
-  cursor:pointer;
-  user-select:none;
-  filter:drop-shadow(0 0 8px rgba(255,255,255,0.3));
-}
-@keyframes shake{
-  0%,100%{transform:rotate(0deg);}
-  25%{transform:rotate(3deg);}
-  75%{transform:rotate(-3deg);}
-}
-#title{
-  position:absolute;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>未来回音 💌</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="envelope" id="envelope"></div>
+  <div class="title">未来回音 💌</div>
+
+  <div class="input-area" id="inputArea">
+    <textarea id="message" placeholder="写下此刻心声..."></textarea>
+    <div>
+      <label><input type="radio" name="voice" value="female" checked> 女声</label>
+      <label><input type="radio" name="voice" value="male"> 男声</label>
+    </div>
+    <button id="generate">生成未来回信</button>
+  </div>
+
+  <div class="letter" id="letter"></div>
+  <div class="controls" id="controls" style="display:none;">
+    <button id="voiceBtn">🔊 播放语音</button>
+  </div>
+
+  <script>
+    const envelope = document.getElementById("envelope");
+    const inputArea = document.getElementById("inputArea");
+    const letter = document.getElementById("letter");
+    const controls = document.getElementById("controls");
+    const voiceBtn = document.getElementById("voiceBtn");
+    const generateBtn = document.getElementById("generate");
+    const body = document.body;
+
+    const gradients = [
+      ["#ffb0d9", "#d6b0ff"],
+      ["#ffc7a4", "#ff8db0"],
+      ["#a4c8ff", "#c6a4ff"],
+      ["#ffa8b0", "#ffb0f0"]
+    ];
+
+    setTimeout(() => showInput(), 3000);
+
+    envelope.addEventListener("click", showInput);
+
+    function showInput() {
+      envelope.style.display = "none";
+      inputArea.style.display = "flex";
+    }
+
+    generateBtn.addEventListener("click", async () => {
+      const text = document.getElementById("message").value;
+      const gender = document.querySelector('input[name="voice"]:checked').value;
+
+      letter.style.display = "flex";
+      letter.innerText = "未来的你说：\n\n" + text;
+      controls.style.display = "flex";
+
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, gender })
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        let audio = new Audio(data.url);
+        let playing = false;
+
+        voiceBtn.onclick = () => {
+          if (!playing) {
+            audio.play();
+            playing = true;
+            voiceBtn.textContent = "⏹ 停止播放";
+          } else {
+            audio.pause();
+            audio.currentTime = 0;
+            playing = false;
+            voiceBtn.textContent = "🔊 播放语音";
+          }
+        };
+      }
+    });
+
+    body.addEventListener("click", () => {
+      const g = gradients[Math.floor(Math.random() * gradients.length)];
+      body.style.background = `radial-gradient(circle at center, ${g[0]}, ${g[1]}, #000)`;
+    });
+  </script>
+</body>
+</html>  position:absolute;
   top:33%;
   text-align:center;
   width:100%;
