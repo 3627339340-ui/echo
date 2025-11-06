@@ -1,23 +1,18 @@
-const express = require('express');
-const path = require('path');
-const bodyParser = require('body-parser');
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { router as voiceRouter } from "./api/voice.js";
 
-const generateHandler = require('./api/generate');
-const voiceHandler = require('./api/voice');
-
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-app.use(bodyParser.json({ limit: '512kb' }));
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('/_health', (req,res)=>res.status(200).send('ok'));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/api/voice", voiceRouter);
 
-// API 路由
-app.post('/api/generate', (req,res)=>generateHandler(req,res));
-app.get('/api/voice', (req,res)=>voiceHandler(req,res));
+app.get("/", (_, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-process.on('uncaughtException', (err)=>console.error('[uncaughtException]', err));
-process.on('unhandledRejection', (reason)=>console.error('[unhandledRejection]', reason));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, ()=>console.log(`✅ future-echo server started on port ${PORT}`));
+const port = process.env.PORT || 8080;
+app.listen(port, () => console.log(`✅ Server running on port ${port}`));
