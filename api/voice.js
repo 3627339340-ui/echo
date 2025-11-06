@@ -1,27 +1,29 @@
-const axios = require('axios');
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import gTTS from "gtts";
 
-module.exports = async function voiceHandler(req, res) {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+export const router = express.Router();
+
+router.post("/", async (req, res) => {
   try {
-    if (req.method !== 'GET') return res.status(405).json({ error:'只支持 GET' });
+    const { text, gender } = req.body;
+    if (!text) return res.status(400).json({ error: "Text required" });
 
-    const text = req.query.text;
-    const gender = req.query.gender || 'female';
-    if (!text) return res.status(400).json({ error:'text 参数不能为空' });
+    const voiceLang = gender === "male" ? "en" : "zh-CN";
+    const filename = `voice_${Date.now()}.mp3`;
+    const filepath = path.join(__dirname, "../public", filename);
 
-    const API_KEY = process.env.ZHIPU_API_KEY || '';
-    if (!API_KEY) return res.status(400).json({ error:'未配置 API_KEY' });
+    const tts = new gTTS(text, voiceLang);
+    await new Promise((resolve, reject) => {
+      tts.save(filepath, err => (err ? reject(err) : resolve()));
+    });
 
-    const ttsRes = await axios.post(
-      'https://open.bigmodel.cn/api/paas/v4/tts',
-      { text, voice: gender==='male'?'zh_male':'zh_female', format:'mp3' },
-      { headers:{ Authorization:`Bearer ${API_KEY}` }, responseType:'arraybuffer', timeout:20000 }
-    );
-
-    res.setHeader('Content-Type','audio/mpeg');
-    res.send(ttsRes.data);
-
-  } catch (err) {
-    console.error('[VOICE ERROR]', err.message || err);
-    res.status(500).json({ error:'语音生成失败', details: err.message || String(err) });
+    res.json({ url: `/${filename}` });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "TTS failed" });
   }
-};
+});
